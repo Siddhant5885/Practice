@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Colorful Boxes — Demo</title>
+  <style>
+    :root{
+      --bg: #f7fafc;
+      --card-bg: #ffffff;
+      --accent: #C11B7D;
+      --muted: #6b7280;
+      --gap: 18px;
+      --radius: 12px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      padding:32px;
+      background:linear-gradient(180deg,var(--bg),#eef2f7);
+      color:#111827;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap{
+      max-width:1000px;
+      margin:0 auto;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:24px;
+    }
+
+    h1{
+      margin:0;
+      font-size:28px;
+      letter-spacing:-0.02em;
+    }
+
+    p.lead{
+      margin:6px 0 0 0;
+      color:var(--muted);
+    }
+
+    .controls{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    button{
+      padding:8px 12px;
+      border-radius:10px;
+      border:0;
+      background:var(--card-bg);
+      box-shadow:0 3px 8px rgba(15,23,42,0.06);
+      cursor:pointer;
+      font-weight:600;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:var(--gap);
+    }
+
+    .card{
+      background:var(--card-bg);
+      padding:18px;
+      border-radius:var(--radius);
+      box-shadow:0 8px 20px rgba(13,18,28,0.06);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:flex-start;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+
+    .card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 16px 40px rgba(13,18,28,0.09);
+    }
+
+    .swatch{
+      width:100%;
+      height:90px;
+      border-radius:10px;
+      display:block;
+    }
+
+    .meta{
+      display:flex;
+      width:100%;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+    }
+
+    .label{
+      font-size:14px;
+      font-weight:700;
+    }
+
+    .hex{
+      font-family:monospace;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    footer{
+      margin-top:26px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* small screen tweaks */
+    @media (max-width:480px){
+      body{padding:20px}
+      h1{font-size:22px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Colorful Boxes Demo</h1>
+        <p class="lead">A simple frontend demo showing text, colored boxes and hover effects.</p>
+      </div>
+      <div class="controls">
+        <button id="shuffle">Shuffle Colors</button>
+        <button id="toggleTheme">Toggle Theme</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="grid" id="palette">
+        <!-- Cards will be rendered here by JS -->
+      </section>
+
+      <footer>
+        Tip: Click <strong>Shuffle Colors</strong> to randomize the swatches, or hover a card to see a lift animation.
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const colors = [
+      {name:'Magenta', hex:'#C11B7D'},
+      {name:'Sunset', hex:'#FF7A59'},
+      {name:'Lime', hex:'#6BE281'},
+      {name:'Sky', hex:'#4FB0FF'},
+      {name:'Violet', hex:'#8B5CF6'},
+      {name:'Amber', hex:'#F59E0B'},
+      {name:'Teal', hex:'#14B8A6'},
+      {name:'Rose', hex:'#FB7185'}
+    ];
+
+    const palette = document.getElementById('palette');
+
+    function render(arr){
+      palette.innerHTML = '';
+      arr.forEach(c => {
+        const card = document.createElement('article');
+        card.className = 'card';
+
+        const sw = document.createElement('div');
+        sw.className = 'swatch';
+        sw.style.background = c.hex;
+
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.textContent = c.name;
+
+        const hex = document.createElement('div');
+        hex.className = 'hex';
+        hex.textContent = c.hex;
+
+        meta.appendChild(label);
+        meta.appendChild(hex);
+
+        card.appendChild(sw);
+        card.appendChild(meta);
+
+        palette.appendChild(card);
+      })
+    }
+
+    function shuffle(a){
+      // simple Fisher-Yates
+      for(let i=a.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
+    }
+
+    document.getElementById('shuffle').addEventListener('click', ()=>{
+      render(shuffle([...colors]));
+    });
+
+    // Theme toggle: invert background quickly
+    let dark=false;
+    document.getElementById('toggleTheme').addEventListener('click', ()=>{
+      dark = !dark;
+      if(dark){
+        document.documentElement.style.setProperty('--bg','#0f1724');
+        document.documentElement.style.setProperty('--card-bg','#071127');
+        document.documentElement.style.setProperty('--muted','#9aa6b2');
+        document.documentElement.style.setProperty('--accent','#7c3aed');
+        document.body.style.color='#e6eef8';
+      } else {
+        document.documentElement.style.setProperty('--bg','#f7fafc');
+        document.documentElement.style.setProperty('--card-bg','#ffffff');
+        document.documentElement.style.setProperty('--muted','#6b7280');
+        document.documentElement.style.setProperty('--accent','#C11B7D');
+        document.body.style.color='#111827';
+      }
+    });
+
+    // initial render
+    render(colors);
+  </script>
+</body>
+</html>
